@@ -5,7 +5,8 @@ Extracted from a homework assignment.
 
 To build:
 > pip install --upgrade setuptools
->python -m build
+
+> python -m build
 
 To run the few tests, and see the examples
 
