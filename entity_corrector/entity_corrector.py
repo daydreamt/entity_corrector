@@ -18,9 +18,6 @@ class EntityCorrector:
         self.token2idx = {ch: idx for idx, ch in enumerate(sorted(set(tokenized_text)))}
 
         self.X = np.array([self.sentence_to_vector(x) for x in entities])
-        # ENH: I believe it works, but there's a small chance that BT bugged due to the encoding:
-        # levenshtein distance <>  0 if x == y, irrelevant if x <> 0
-        # => Hence might need modified pivot construction
         self.construct_balltree = construct_balltree
         if self.construct_balltree:
             self.tree = BallTree(
@@ -39,8 +36,8 @@ class EntityCorrector:
 
     def get_nearest_within_linear(self, sentence, within=3):
         """ Runs in O(M*N), where N is the number of data and M is the max of the sentence length,
-    and the maximum sentence length in the dataset"
-    """
+        and the maximum sentence length in the dataset"
+        """
         encoding = self.sentence_to_vector(sentence)
         distances = []
         idxes = []
@@ -82,28 +79,28 @@ class EntityCorrector:
 
     def get_corrected_linear(self, sentence):
         """
-      Due to a slight issue to how this damerau_levenshtein behaves due to the encoding 
+        Due to a slight issue to how this damerau_levenshtein behaves due to the encoding 
 
-       x
-      array([ 1, 17, 10, 12, 17,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+        x
+        array([ 1, 17, 10, 12, 17,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
           0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
           0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0])
 
-      y 
-      array([ 1, 17, 10,  1, 12, 17,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+        y 
+        array([ 1, 17, 10,  1, 12, 17,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
           0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
           0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0])
 
-      damerau_levenshtein_distance(x, y)
-      2
-      whereas
-      damerau_levenshtein_distance("atlnta", "atlanta")
-      1
-      => Hence as a O(1) workaround, this default function
-      searches for within=3 and then applies the levenshtein distance 
-      again.
-      )
-      """
+        damerau_levenshtein_distance(x, y)
+        2
+        whereas
+        damerau_levenshtein_distance("atlnta", "atlanta")
+        1
+        => Hence as a O(1) workaround, this default function
+        searches for within=3 and then applies the levenshtein distance 
+        again.
+        )
+        """
         candidates = self.get_nearest_within_linear(sentence, within=2)
         res = [x for x in candidates if damerau_levenshtein_distance(sentence, x) <= 1]
         return res
